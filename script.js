@@ -1,7 +1,68 @@
 /* =========================================================
    SOS BEACON - 100% TRUE OFFLINE HARDWARE DSP ENGINE (v7.0)
    ========================================================= */
+// ==========================================
+// 1. OFFLINE GEOHASH GENERATOR
+// ==========================================
+function encodeGeoHash(lat, lon, precision = 9) {
+  const B32 = "0123456789bcdefghjkmnpqrstuvwxyz";
+  let latMin = -90.0, latMax = 90.0;
+  let lonMin = -180.0, lonMax = 180.0;
+  let geohash = "";
+  let isEven = true;
+  let bit = 0;
+  let ch = 0;
 
+  while (geohash.length < precision) {
+    let mid;
+    if (isEven) {
+      mid = (lonMin + lonMax) / 2;
+      if (lon > mid) {
+        ch |= (1 << (4 - bit));
+        lonMin = mid;
+      } else {
+        lonMax = mid;
+      }
+    } else {
+      mid = (latMin + latMax) / 2;
+      if (lat > mid) {
+        ch |= (1 << (4 - bit));
+        latMin = mid;
+      } else {
+        latMax = mid;
+      }
+    }
+    isEven = !isEven;
+    if (bit < 4) {
+      bit++;
+    } else {
+      geohash += B32[ch];
+      bit = 0;
+      ch = 0;
+    }
+  }
+  return geohash;
+}
+
+// ==========================================
+// 2. LIVE GPS TRACKER (Background me coordinates update rakhega)
+// ==========================================
+let currentLat = null;
+let currentLon = null;
+
+if ("geolocation" in navigator) {
+  navigator.geolocation.watchPosition(
+    (pos) => {
+      currentLat = pos.coords.latitude.toFixed(6);
+      currentLon = pos.coords.longitude.toFixed(6);
+      // Agar purane code me window.userLatitude use ho raha ho toh dono sync rahenge
+      window.userLatitude = currentLat;
+      window.userLongitude = currentLon;
+    },
+    (err) => console.warn("GPS Acquiring Error:", err.message),
+    { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+  );
+}
 // Service Worker for 100% Offline Airplane-Mode Operation
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
@@ -442,36 +503,49 @@ function toggleDefenseSiren() {
   if (isSirenActive) stopDefenseSiren();
   else startDefenseSiren();
 }
+// ==========================================
+// 7. TACTICAL EMERGENCY SMS DISPATCHER
+// ==========================================
+function triggerEmergencySMS() {
+  // Saved emergency number uthayega (agar user ne save kiya hai)
+  const savedContact = localStorage.getItem("sos_emergency_contact") || "";
 
-/* ---------------------------------------------------------
-   7. AUTO SMS COMPOSER TO CLOSE CONTACTS (OFFLINE RELAY)
-   --------------------------------------------------------- */
-function executeEmergencyBroadcast(triggerSource) {
-  startDefenseSiren();
-  startStrobeBeacon();
+  const latText = currentLat || (window.userLatitude ? parseFloat(window.userLatitude).toFixed(6) : "ACQUIRING...");
+  const lonText = currentLon || (window.userLongitude ? parseFloat(window.userLongitude).toFixed(6) : "ACQUIRING...");
+  
+  const hasCoordinates = currentLat && currentLon;
+  
+  const mapsLink = hasCoordinates 
+    ? `https://maps.google.com/?q=${latText},${lonText}` 
+    : "GPS Lock In Progress / Offline Mode";
+  
+  const geohashCode = hasCoordinates 
+    ? encodeGeoHash(parseFloat(latText), parseFloat(lonText), 9) 
+    : "OFFLINE_BEACON";
 
-  const numbers = emergencyContacts.map(c => c.phone.trim()).filter(p => p.length > 0);
-  const targetNumbers = numbers.length > 0 ? numbers.join(";") : "+918091221136";
+  // SMS Body Payload
+  const alertText = 
+`🚨 [SOS TACTICAL ALERT] 🚨
+EMERGENCY BEACON TRIGGERED! NEED IMMEDIATE HELP.
 
-  const rescueMessage =
-`[EMERGENCY RESCUE ALERT]
-IMMEDIATE DISTRESS REPORTED.
-GEOHASH: ${currentHash} (~19m Cell)
-ACCURACY: ~${currentAccuracy.toFixed(1)}m
-LATITUDE: ${currentLat.toFixed(6)} N
-LONGITUDE: ${currentLon.toFixed(6)} E
-ALTITUDE: ${currentAltitude}m MSL
-BATTERY: ${batteryPercent}
-TRIGGER: ${triggerSource}
-MAP LINK: https://maps.google.com/?q=${currentLat.toFixed(6)},${currentLon.toFixed(6)}`;
+📍 Coordinates:
+Lat: ${latText}
+Lon: ${lonText}
 
-  addEventLog(`SOS DISPATCHED: ${triggerSource}`, "ALERT");
+🗺️ Exact Map Location:
+${mapsLink}
 
-  // Native Cellular Protocol Scheme
-  const smsScheme = `sms:${targetNumbers}?body=${encodeURIComponent(rescueMessage)}`;
-  setTimeout(() => {
-    window.location.href = smsScheme;
-  }, 1000);
+🌐 GeoHash: ${geohashCode}
+(Time: ${new Date().toLocaleTimeString()})`;
+
+  const encodedBody = encodeURIComponent(alertText);
+
+  // Agar contact save hai toh direct usi number pe jayega, warna number field khali rahegi
+  const smsURI = savedContact 
+    ? `sms:${savedContact}?body=${encodedBody}` 
+    : `sms:?body=${encodedBody}`;
+
+  window.location.href = smsURI;
 }
 
 /* ---------------------------------------------------------
@@ -702,5 +776,21 @@ window.addEventListener("DOMContentLoaded", () => {
       micStream = st;
       setupHardwareAudioDSP(st);
     }).catch(() => {});
+  }
+}
+function saveEmergencyContact() {
+  const input = document.getElementById("emergencyPhoneInput");
+  if (input && input.value.trim() !== "") {
+    localStorage.setItem("sos_emergency_contact", input.value.trim());
+    alert("Emergency Contact Saved Offline!");
+  }
+}
+
+// App open hote hi pehle se saved number input box me show karein
+window.addEventListener("DOMContentLoaded", () => {
+  const saved = localStorage.getItem("sos_emergency_contact");
+  const input = document.getElementById("emergencyPhoneInput");
+  if (saved && input) {
+    input.value = saved;
   }
 });
