@@ -1,0 +1,17 @@
+{
+  "name": "SOS Beacon Sentinel",
+  "short_name": "SOS Beacon",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#02050D",
+  "theme_color": "#00E5FF",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/neon/512/experimental-alarm-neon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
