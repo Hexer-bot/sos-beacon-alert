@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SOS Beacon - Sentinel Tactical Defense OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient Tactical Cyber Auras -->
+  <div class="ambient-glow glow-cyan"></div>
+  <div class="ambient-glow glow-crimson"></div>
+  <div class="cyber-grid"></div>
+
+  <!-- Hardware Clearances Modal -->
+  <div class="perm-modal-overlay" id="permModal">
+    <div class="perm-card">
+      <div class="perm-head">
+        <div class="radar-scan-icon">
+          <span class="scan-ring"></span>
+          <span class="scan-dot"></span>
+        </div>
+        <div>
+          <h2>TACTICAL SYSTEM AUTHORIZATION</h2>
+          <p>Initialize 100% offline edge hardware sensors</p>
+        </div>
+      </div>
+      <div class="perm-stack">
+        <div class="perm-row" id="chkGeo">
+          <span class="p-ico">🛰️</span>
+          <div class="p-txt"><strong>GNSS Satellites</strong><small>Raw coordinates without cellular data</small></div>
+          <span class="p-tag">PENDING</span>
+        </div>
+        <div class="perm-row" id="chkMic">
+          <span class="p-ico">🎙️</span>
+          <div class="p-txt"><strong>Microphone DSP Engine</strong><small>Passive voice trigger & acoustic scream detection</small></div>
+          <span class="p-tag">PENDING</span>
+        </div>
+        <div class="perm-row" id="chkSensors">
+          <span class="p-ico">📳</span>
+          <div class="p-txt"><strong>Hardware Accelerometer</strong><small>3x violent impact shake trigger</small></div>
+          <span class="p-tag">PENDING</span>
+        </div>
+      </div>
+      <button class="btn-authorize" onclick="authorizeHardwareAccess()">AUTHORIZE ALL DEFENSIVE SENSORS</button>
+    </div>
+  </div>
+
+  <main class="hud-container">
+    <!-- Top HUD Header -->
+    <header class="hud-topbar">
+      <div class="brand-zone">
+        <div class="pulse-beacon">
+          <span class="p-core"></span>
+          <span class="p-wave"></span>
+        </div>
+        <div>
+          <h1 class="hud-title">SOS <span class="neon-cyan">BEACON</span></h1>
+          <span class="hud-tagline">SENTINEL TACTICAL EDGE OS</span>
+        </div>
+      </div>
+      <div class="system-status-pill" id="sysStatusPill">
+        <span class="status-indicator"></span>
+        <span id="sysStatusLabel">OFFLINE SECURE</span>
+      </div>
+    </header>
+
+    <!-- Tactical Navigation Tabs -->
+    <nav class="tactical-tab-bar">
+      <button class="nav-tab-btn active" id="btn-core" onclick="showTab('tab-core')">
+        <span class="tab-icon">🚨</span>
+        <span class="tab-label">CORE SOS</span>
+      </button>
+      <button class="nav-tab-btn" id="btn-telemetry" onclick="showTab('tab-telemetry')">
+        <span class="tab-icon">🛰️</span>
+        <span class="tab-label">TELEMETRY</span>
+      </button>
+      <button class="nav-tab-btn" id="btn-contacts" onclick="showTab('tab-contacts')">
+        <span class="tab-icon">👥</span>
+        <span class="tab-label">CONTACTS</span>
+      </button>
+      <button class="nav-tab-btn" id="btn-config" onclick="showTab('tab-config')">
+        <span class="tab-icon">⚙️</span>
+        <span class="tab-label">CONFIG</span>
+      </button>
+    </nav>
+
+    <!-- ================= TAB 1: CORE SOS ================= -->
+    <section class="tab-content active" id="tab-core">
+      <!-- Voice Sentry Card -->
+      <div class="glass-module sentry-module">
+        <div class="module-header">
+          <div class="sentry-title-wrap">
+            <div class="sentry-avatar">🤖</div>
+            <div>
+              <span class="module-eyebrow">EDGE ACOUSTIC LISTENER</span>
+              <h3 class="sentry-h3">SENTINEL AI v6.0 <span class="tag-offline">100% OFFLINE</span></h3>
+            </div>
+          </div>
+          <button class="voice-arm-btn active" id="voiceToggleBtn" onclick="toggleVoiceListener()">
+            <span id="micStateIco">🎙️</span>
+            <span id="micStateText">ARMED</span>
+          </button>
+        </div>
+
+        <!-- Real-Time Waveform -->
+        <div class="waveform-box active" id="waveformBox">
+          <span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>
+          <span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>
+          <span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>
+          <span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>
+        </div>
+
+        <!-- Live Volume / Decibel Gauge -->
+        <div class="dsp-live-meter">
+          <span class="dsp-lbl">ACOUSTIC DB:</span>
+          <div class="dsp-track">
+            <div class="dsp-bar" id="dspLevelBar"></div>
+          </div>
+          <span class="dsp-num" id="dspLevelNum">0%</span>
+        </div>
+
+        <div class="dialogue-strip">
+          <div class="dialogue-flag" id="aiStatusFlag">DSP LISTENING FOR DISTRESS / PASSCODES</div>
+          <div class="dialogue-speech" id="aiTranscript">
+            "Acoustic Sentry active. Shout loudly, say 'Help', or hold SOS to dispatch."
+          </div>
+        </div>
+      </div>
+
+      <!-- Master Radial Hold Trigger Button -->
+      <div class="master-trigger-stage">
+        <div class="radial-ring-box">
+          <svg class="ring-svg" width="260" height="260">
+            <circle class="ring-track-bg" cx="130" cy="130" r="115"></circle>
+            <circle class="ring-progress" id="sosProgressArc" cx="130" cy="130" r="115"></circle>
+          </svg>
+
+          <button class="central-sos-btn" id="sosCoreBtn">
+            <div class="sos-glow-flare"></div>
+            <span class="sos-txt">SOS</span>
+            <span class="sos-sub">HOLD 1.5S</span>
+          </button>
+        </div>
+        <div class="trigger-hint-line">HOLD 1.5S • SHAKE 3x • SHOUT LOUDLY</div>
+      </div>
+
+      <!-- Quick Action Sensors Row -->
+      <div class="tactical-chips-grid">
+        <div class="action-chip" id="chipShake">
+          <div class="chip-ico">📳</div>
+          <div class="chip-meta">
+            <span class="chip-label">ACCELEROMETER</span>
+            <span class="chip-val" id="shakeStatusVal">ACTIVE (>2.8g)</span>
+          </div>
+        </div>
+
+        <div class="action-chip" id="chipStrobe" onclick="toggleStrobeBeacon()">
+          <div class="chip-ico">⚡</div>
+          <div class="chip-meta">
+            <span class="chip-label">MORSE STROBE</span>
+            <span class="chip-val" id="strobeStatusVal">STANDBY</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- High-Frequency Defense Siren Button -->
+      <div class="glass-module siren-module">
+        <div class="module-header">
+          <span class="module-eyebrow">🚨 HIGH-FREQUENCY ACOUSTIC SIREN</span>
+          <span class="siren-mode-badge" id="sirenBadge">OFFLINE</span>
+        </div>
+        <button class="tactical-siren-trigger" id="sirenBtn" onclick="toggleDefenseSiren()">
+          SOUND DEFENSE BEACON SIREN
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= TAB 2: TELEMETRY ================= -->
+    <section class="tab-content" id="tab-telemetry">
+      <div class="glass-module">
+        <div class="module-header">
+          <span class="module-eyebrow">🛰️ SATELLITE GNSS POSITIONING</span>
+          <button class="sync-pill-btn" onclick="syncLiveCoordinates()">⟳ RE-FIX</button>
+        </div>
+
+        <div class="coords-hero-card">
+          <div class="coord-col">
+            <span class="coord-label">LATITUDE</span>
+            <span class="coord-digits" id="dispLat">30.679600° N</span>
+          </div>
+          <div class="coord-seperator"></div>
+          <div class="coord-col">
+            <span class="coord-label">LONGITUDE</span>
+            <span class="coord-digits" id="dispLon">76.722400° E</span>
+          </div>
+        </div>
+
+        <div class="telemetry-duo-grid">
+          <div class="telemetry-box">
+            <span class="box-caption">8-CHAR GEOHASH</span>
+            <span class="box-val neon-cyan" id="dispGeoHash">ttqw9c59</span>
+            <span class="box-note">Sub-19m Hierarchical Cell</span>
+          </div>
+          <div class="telemetry-box">
+            <span class="box-caption">GPS ACCURACY</span>
+            <span class="box-val neon-green" id="dispAccuracy">7.8 m</span>
+            <span class="box-note" id="dispAltitude">MSL Alt: 312m</span>
+          </div>
+        </div>
+
+        <div class="telemetry-status-row">
+          <span>GNSS FIX: <b class="neon-green" id="gnssLockText">HARDWARE LOCKED</b></span>
+          <span>BATTERY: <b class="neon-cyan" id="dispBattery">92%</b></span>
+          <span>NET: <b class="neon-white">ZERO REQUIRED</b></span>
+        </div>
+      </div>
+
+      <!-- Incident Event Logs -->
+      <div class="glass-module">
+        <div class="module-header">
+          <span class="module-eyebrow">📋 INCIDENT & SENSOR LOG STREAM</span>
+          <button class="clear-btn" onclick="clearEventLogs()">CLEAR</button>
+        </div>
+        <div class="log-stream-box" id="logStreamBox"></div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 3: CONTACTS ================= -->
+    <section class="tab-content" id="tab-contacts">
+      <div class="glass-module">
+        <div class="module-header">
+          <span class="module-eyebrow">👥 EMERGENCY CELLULAR RELAYS</span>
+          <span class="count-tag" id="contactsCounter">2 Nodes Configured</span>
+        </div>
+
+        <div class="add-node-form">
+          <input type="text" class="tactical-field" id="nodeNameInput" placeholder="Contact Name (e.g. Papa/Mom/Hostel)">
+          <input type="tel" class="tactical-field" id="nodePhoneInput" placeholder="Mobile Number (+91...)">
+          <button class="btn-add-contact" onclick="addNewContactNode()">+ ADD NODE</button>
+        </div>
+
+        <div class="contacts-scroll-list" id="contactsListWrap"></div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 4: CONFIGURATION ================= -->
+    <section class="tab-content" id="tab-config">
+      <div class="glass-module">
+        <div class="module-header">
+          <span class="module-eyebrow">⚙️ SENTINEL DEFENSE PROTOCOLS</span>
+        </div>
+
+        <div class="config-item">
+          <label class="field-label">OFFLINE SHOUT / SCREAM SENSITIVITY</label>
+          <select class="tactical-select" id="dspSensSelect" onchange="changeSensitivity()">
+            <option value="55">Ultra High (Whisper / Blow into Mic)</option>
+            <option value="68" selected>Medium High (Loud Voice / Normal Scream)</option>
+            <option value="80">Heavy Shock (Aggressive Scream Only)</option>
+          </select>
+          <span class="field-hint">Edge Hardware DSP decibel threshold for offline audio activation.</span>
+        </div>
+
+        <div class="config-item">
+          <label class="field-label">CUSTOM DISTRESS VOICE PASSCODES</label>
+          <input type="text" class="tactical-field" id="passcodesField" value="bachao, help, emergency, red alert, save me, khatra" placeholder="Comma separated passcodes">
+          <span class="field-hint">Spoken phrase fallback matchers that force immediate trigger.</span>
+        </div>
+
+        <div class="config-item">
+          <label class="field-label">HARDWARE PERMISSION RE-CHECK</label>
+          <button class="btn-outline-cyan" onclick="openHardwareModal()">🛡️ OPEN SENSOR PERMISSIONS MODAL</button>
+        </div>
+
+        <button class="btn-save-all" onclick="saveConfiguration()">SAVE SYSTEM SETTINGS</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
