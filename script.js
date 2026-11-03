@@ -793,4 +793,49 @@ window.addEventListener("DOMContentLoaded", () => {
   if (saved && input) {
     input.value = saved;
   }
+}
+// Authorization button ko force unlock karna
+const authBtn = document.querySelector("button:has-text('AUTHORIZE ALL DEFENSIVE SENSORS')") || 
+                document.getElementById("authSensorsBtn") || 
+                document.querySelector(".auth-btn") ||
+                document.querySelector("button[onclick*='auth']");
+
+function forceUnlockDashboard() {
+  // 1. Overlay modal ko screen se hatana
+  const authModal = document.querySelector(".auth-modal") || 
+                    document.querySelector("[class*='modal']") || 
+                    document.querySelector("[class*='authorization']");
+  if (authModal) {
+    authModal.style.display = "none";
+  }
+
+  // 2. Main tabs/dashboard ko active karna
+  const mainTab = document.getElementById("tab-core") || document.querySelector(".tab-content");
+  if (mainTab) {
+    mainTab.classList.add("active");
+    mainTab.style.display = "block";
+  }
+
+  // 3. Audio context aur GPS ko non-blocking background me chalu karna
+  try {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true }).catch(() => {});
+    }
+  } catch(e) {}
+
+  try {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(() => {}, () => {});
+    }
+  } catch(e) {}
+}
+
+// Button par click hote hi turant dashboard khulega
+document.addEventListener("DOMContentLoaded", () => {
+  const allBtns = document.querySelectorAll("button");
+  allBtns.forEach(btn => {
+    if (btn.innerText.includes("AUTHORIZE ALL DEFENSIVE SENSORS")) {
+      btn.addEventListener("click", forceUnlockDashboard);
+    }
+  });
 });
